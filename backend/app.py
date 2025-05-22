@@ -1,4 +1,11 @@
 from flask import Flask
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 app = Flask(__name__)
 
@@ -10,8 +17,6 @@ def hello():
 def questions():
     return {"questions":
             ["nani desu ka? = whats that", "yes"]}
-
-
 
 
 # main driver func

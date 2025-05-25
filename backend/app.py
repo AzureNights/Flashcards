@@ -19,12 +19,12 @@ app = Flask(__name__)
 @app.route('/')
 def test_apikey():
     if GEMINI_API_KEY:
-        api_key_status = "Loaded Successfully!"
+        api_key_status = "API Key Works! YAY!"
     else:
         api_key_status = "Not found. Oops."
 
 
-    return f"Yay! App is running. Gemini Key Status: {api_key_status}"
+    return f"Yay! App is running. API Key Status: {api_key_status}"
 
 @app.route("/questions")
 def questions():

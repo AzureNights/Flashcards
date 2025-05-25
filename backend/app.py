@@ -24,7 +24,13 @@ def test_apikey():
         api_key_status = "Not found. Oops."
 
 
-    return f"Yay! App is running. API Key Status: {api_key_status}"
+    if client:
+        client_status = "Yay. Client was initialized too!"
+    else:
+        client_status = "Not initialized :("
+
+
+    return f"Yay! App is running. API Key Status: {api_key_status} AI Status: {client_status}"
 
 @app.route("/questions")
 def questions():

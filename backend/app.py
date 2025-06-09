@@ -8,11 +8,18 @@ load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-gemini_client = genai.Client(api_key=GEMINI_API_KEY)
-response = gemini_client.models.generate_content(
-    model="gemini-2.0-flash", contents="Explain some kanji"
-)
-# print(response.text)
+gemini_client = None
+if GEMINI_API_KEY: 
+    try:
+        gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+        print("Global Gemini Client initialized. YAY!")
+
+    except Exception as e:
+        print(f"Error when initializing Gemini client: {e}")
+        gemini_client = None
+
+else: print("Gemini API Key not found. Global client not initialized.")
+
 
 app = Flask(__name__)
 
@@ -40,9 +47,21 @@ def test_apikey():
 
 @app.route("/api/simple-prompt", methods = ["POST"])
 def simple_prompt():
-    return jsonify({
-        "message": "This endpointworks YAY!"
-    })
+
+    gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+    response = gemini_client.models.generate_content(
+        model="gemini-1.0-flash"
+    )
+
+    if gemini_client:
+        return jsonify({
+            "Success!": "Gemini AI at your service!"
+        })
+    
+    else:
+        return jsonify({
+            "message": "This endpointworks YAY!"
+        })
 
 
 # main driver func

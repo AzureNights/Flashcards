@@ -23,6 +23,7 @@ else: print("Gemini API Key not found. Global client not initialized.")
 
 app = Flask(__name__)
 
+-
 @app.route('/')
 def test_apikey():
     if GEMINI_API_KEY:
@@ -36,14 +37,8 @@ def test_apikey():
     else:
         client_status = "Not initialized :("
 
-
     return f"Yay! App is running. <br> API Key Status: {api_key_status} <br> AI Status: {client_status}"
 
-# Started off with a json endpoint 
-# @app.route("/questions")
-# def questions():
-#     return {"questions":
-#             ["nani desu ka? = whats that", "yes"]}
 
 @app.route("/api/simple-prompt", methods = ["POST"])
 def simple_prompt():

@@ -14,15 +14,16 @@ from io import BytesIO
 
 
 
-# Get Info from PDF Uploads
+# Get Info from PDF Uploads in text form 
 def get_pdf_info(file):
     pdf_reader = PdfReader(BytesIO(file.read()))
     text = ""
+    for page in pdf_reader.pages:
+        text += page.extract_text()
+    return text 
 
 
-
-
-# Gemini API 
+# Gemini API SetUp 
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -77,6 +78,34 @@ def simple_prompt():
             "message": "This endpointworks YAY!"
         })
 
+
+
+@app.route("/api/upload-file", methods = ["POST"])
+def upload_file():
+    file = request.files['file']
+
+    if 'file' not in request.files:
+        return jsonify({"error": "No 'file' found"}), 400
+    
+    if file.filename == "":
+        return jsonify({"error": "No file selected"}), 400
+    
+    if not file.filename.endswith('.pdf'):
+        return jsonify({"error": "Invalid file type. Please uplaod a .pdf file"}), 400
+    
+
+    try:
+        extracted_text = get_pdf_info(file)
+
+        return jsonify({
+            "message": "File was processed successfully! Yay!",
+            "filename": file.filename,
+            "text_length": len(extracted_text),
+            "text_preview": extracted_text[:250] + "..."
+        }), 200
+    
+    except Exception as e: 
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 # main driver func
 if __name__ == '__main__':

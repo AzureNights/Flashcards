@@ -1,9 +1,28 @@
-from flask import Flask, jsonify, render_template
-from dotenv import load_dotenv
 import os
+from flask import Flask, jsonify, render_template, flash, request, redirect, url_for
+from dotenv import load_dotenv
 from google import genai
+from pypdf import PdfReader
+from io import BytesIO
+
+# TODO 
+# Get PDF file 
+# Get text extracted from file
+
+# File
+# file = request.files
 
 
+
+# Get Info from PDF Uploads
+def get_pdf_info(file):
+    pdf_reader = PdfReader(BytesIO(file.read()))
+    text = ""
+
+
+
+
+# Gemini API 
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -23,7 +42,7 @@ else: print("Gemini API Key not found. Global client not initialized.")
 
 app = Flask(__name__)
 
--
+
 @app.route('/')
 def test_apikey():
     if GEMINI_API_KEY:

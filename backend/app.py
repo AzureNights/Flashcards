@@ -4,14 +4,12 @@ from dotenv import load_dotenv
 from google import genai
 from pypdf import PdfReader
 from io import BytesIO
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # TODO 
-# Get PDF file 
-# Get text extracted from file
-
-# File
-# file = request.files
-
+# Get PDF file DONE
+# Get text extracted from file DONE
+# Use langchain - to chunk, vectorize and store my data 
 
 
 # Get Info from PDF Uploads in text form 
@@ -21,6 +19,17 @@ def get_pdf_info(file):
     for page in pdf_reader.pages:
         text += page.extract_text()
     return text 
+
+#Split the text into chunks using langchain's text splitter 
+def get_text_chunks(text):
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=200,   
+        # Shows that its counting characters rather than token length. but default is char count - so line can be removed 
+        length_function=len 
+    )
+    chunks = text_splitter.split_text(text)
+    return chunks
 
 
 # Gemini API SetUp 
@@ -97,11 +106,16 @@ def upload_file():
     try:
         extracted_text = get_pdf_info(file)
 
+        chunked_text = get_text_chunks(extracted_text)
+
         return jsonify({
             "message": "File was processed successfully! Yay!",
             "filename": file.filename,
             "text_length": len(extracted_text),
-            "text_preview": extracted_text[:250] + "..."
+            "text_preview": extracted_text[:250] + "...",
+            "number_of_chunks": len(chunked_text),
+            "chunk_preview": chunked_text[0] 
+            if chunked_text else "No chunks generatet. Sorry!"
         }), 200
     
     except Exception as e: 

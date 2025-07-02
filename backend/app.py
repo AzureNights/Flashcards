@@ -5,12 +5,26 @@ from google import genai
 import fitz # PyMuPDF import 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-# TODO 
-# Get PDF file DONE
-# Get text extracted from file DONE
-# Use langchain - to chunk, vectorize and store my data 
 
-# Get Info from PDF Uploads in text form PyPDF
+# ------------------------------------------------------------------------------------------------------------
+# Gemini API SetUp 
+# ------------------------------------------------------------------------------------------------------------
+
+load_dotenv()
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if GEMINI_API_KEY: 
+        gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+        print("Global Gemini Client initialized. YAY!")
+
+else: print("Gemini API Key not found. Global client not initialized.")
+
+# ------------------------------------------------------------------------------------------------------------
+# Helper Functions
+# ------------------------------------------------------------------------------------------------------------
+
+# Get Info from PDF Uploads in text form using PyMuPDF
 def get_pdf_info(file):
     text = ""
     file = file.read()
@@ -21,7 +35,6 @@ def get_pdf_info(file):
             if page_text:
                 text += page_text
     return text
-
 
 
 # Split the text into chunks using langchain's text splitter 
@@ -35,42 +48,25 @@ def get_text_chunks(text):
     chunks = text_splitter.split_text(text)
     return chunks
 
-# # Embed the chunks with google 
-# def embed_the_chunks(chunks):
-#     #for Japanese support - text-embedding-004 very good for eng 
-#     embedding_model = "models/text-multilingual-embedding-002"
 
-#     response = genai.embed_content(
-#         model=embedding_model,
-#         content=chunks,
-#         #Optional + Only for models/embedding-001
-#         # task_type
-#     )
-#     content = chunks
+# Embed the chunks with google 
+def embed_the_chunks(chunks):
+    #for Japanese support - text-embedding-004 very good for eng 
+    embedding_model = "models/text-multilingual-embedding-002"
 
+    response = genai.embed_content(
+        model=embedding_model,
+        content=chunks,
+        #Optional + Only for models/embedding-001
+        # task_type
+    )
+    content = chunks
 
-
-
-# Gemini API SetUp 
-load_dotenv()
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-gemini_client = None
-if GEMINI_API_KEY: 
-    try:
-        gemini_client = genai.Client(api_key=GEMINI_API_KEY)
-        print("Global Gemini Client initialized. YAY!")
-
-    except Exception as e:
-        print(f"Error when initializing Gemini client: {e}")
-        gemini_client = None
-
-else: print("Gemini API Key not found. Global client not initialized.")
-
+# ------------------------------------------------------------------------------------------------------------
+# Flask App Routes 
+# ------------------------------------------------------------------------------------------------------------
 
 app = Flask(__name__)
-
 #Configure Flask to handle UTF-8 Characters correctly 
 app.config['JSON_AS_ASCII'] = False
 
@@ -109,7 +105,6 @@ def simple_prompt():
         })
 
 
-
 @app.route("/api/upload-file", methods = ["POST"])
 def upload_file():
     file = request.files['file']
@@ -142,7 +137,10 @@ def upload_file():
     except Exception as e: 
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
-# main driver func
+# ------------------------------------------------------------------------------------------------------------
+# Main Driver Func
+# ------------------------------------------------------------------------------------------------------------
+
 if __name__ == '__main__':
     app.run(debug=True)
 

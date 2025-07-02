@@ -1,10 +1,8 @@
 import os
-from flask import Flask, jsonify, render_template, flash, request, redirect, url_for
+from flask import Flask, jsonify, request
 from dotenv import load_dotenv
 from google import genai
-from pypdf import PdfReader
-import fitz
-from io import BytesIO
+import fitz # PyMuPDF import 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # TODO 

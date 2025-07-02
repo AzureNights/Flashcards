@@ -12,7 +12,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 # Get text extracted from file DONE
 # Use langchain - to chunk, vectorize and store my data 
 
-# Get Info from PDF Uploads in text form 
+# Get Info from PDF Uploads in text form PyPDF
 def get_pdf_info(file):
     pdf_reader = PdfReader(BytesIO(file.read()))
     text = ""
@@ -25,7 +25,9 @@ def get_pdf_info(file):
     print(text)
     print("------------------------------")
        
-    return text 
+    return text
+
+
 
 # Split the text into chunks using langchain's text splitter 
 def get_text_chunks(text):

@@ -3,7 +3,7 @@ from flask import Flask, jsonify, render_template, flash, request, redirect, url
 from dotenv import load_dotenv
 from google import genai
 from pypdf import PdfReader
-import pymupdf
+import fitz
 from io import BytesIO
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -14,17 +14,14 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # Get Info from PDF Uploads in text form PyPDF
 def get_pdf_info(file):
-    pdf_reader = PdfReader(BytesIO(file.read()))
     text = ""
+    file = file.read()
 
- 
-    for page in pdf_reader.pages:
-        text += page.extract_text()
-
-    print("--- DEBUG: Text from pypdf ---")
-    print(text)
-    print("------------------------------")
-       
+    with fitz.open(stream=file, filetype="pdf") as doc:
+        for page in doc:
+            page_text = page.get_text()
+            if page_text:
+                text += page_text
     return text
 
 

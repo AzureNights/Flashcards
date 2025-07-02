@@ -15,7 +15,7 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 if GEMINI_API_KEY: 
-        gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+        client = genai.Client(api_key=GEMINI_API_KEY)
         print("Global Gemini Client initialized. YAY!")
 
 else: print("Gemini API Key not found. Global client not initialized.")
@@ -54,13 +54,13 @@ def embed_the_chunks(chunks):
     #for Japanese support - text-embedding-004 very good for eng 
     embedding_model = "models/text-multilingual-embedding-002"
 
-    response = genai.embed_content(
-        model=embedding_model,
-        content=chunks,
-        #Optional + Only for models/embedding-001
-        # task_type
+    result = client.models.embed_content(
+        model = embedding_model,
+        contents = chunks,
+        # check which one 
+        config = {"task_type": "retrieval_document"}
     )
-    content = chunks
+    return result.embeddings
 
 # ------------------------------------------------------------------------------------------------------------
 # Flask App Routes 

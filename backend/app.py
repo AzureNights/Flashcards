@@ -3,6 +3,7 @@ from flask import Flask, jsonify, render_template, flash, request, redirect, url
 from dotenv import load_dotenv
 from google import genai
 from pypdf import PdfReader
+import pymupdf
 from io import BytesIO
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -11,16 +12,22 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 # Get text extracted from file DONE
 # Use langchain - to chunk, vectorize and store my data 
 
-
 # Get Info from PDF Uploads in text form 
 def get_pdf_info(file):
     pdf_reader = PdfReader(BytesIO(file.read()))
     text = ""
+
+ 
     for page in pdf_reader.pages:
         text += page.extract_text()
+
+    print("--- DEBUG: Text from pypdf ---")
+    print(text)
+    print("------------------------------")
+       
     return text 
 
-#Split the text into chunks using langchain's text splitter 
+# Split the text into chunks using langchain's text splitter 
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
@@ -30,6 +37,21 @@ def get_text_chunks(text):
     )
     chunks = text_splitter.split_text(text)
     return chunks
+
+# # Embed the chunks with google 
+# def embed_the_chunks(chunks):
+#     #for Japanese support - text-embedding-004 very good for eng 
+#     embedding_model = "models/text-multilingual-embedding-002"
+
+#     response = genai.embed_content(
+#         model=embedding_model,
+#         content=chunks,
+#         #Optional + Only for models/embedding-001
+#         # task_type
+#     )
+#     content = chunks
+
+
 
 
 # Gemini API SetUp 
@@ -52,6 +74,8 @@ else: print("Gemini API Key not found. Global client not initialized.")
 
 app = Flask(__name__)
 
+#Configure Flask to handle UTF-8 Characters correctly 
+app.config['JSON_AS_ASCII'] = False
 
 @app.route('/')
 def test_apikey():

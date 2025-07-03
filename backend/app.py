@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from google import genai
 import fitz # PyMuPDF import 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+import chromadb
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -58,10 +59,14 @@ def embed_the_chunks(chunks):
         # check which one 
         config = {"task_type": "retrieval_document"}
     )
-
     embedding_values = [embedding.values for embedding in result.embeddings]
-
     return embedding_values
+
+# Create the One Collection to Host them All 
+def create_chroma_collection():
+    chroma_client = chromadb.Client()
+    collection = chroma_client.create_collection(name="moi_library")
+    collection.add()
 
 # ------------------------------------------------------------------------------------------------------------
 # Flask App Routes 

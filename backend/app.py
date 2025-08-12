@@ -63,10 +63,23 @@ def embed_the_chunks(chunks):
     return embedding_values
 
 # Create the One Collection to Host them All 
-def create_chroma_collection():
+def create_chroma_collection(chunks, embedding_values):
     chroma_client = chromadb.Client()
-    collection = chroma_client.create_collection(name="moi_library")
-    collection.add()
+    # to use the count method i need to use vector_collection instead 
+    collection = chroma_client.get_or_create_collection(name="moi_library")
+    # Inside collection.add -> documents(chunks), embeddings(prev func) and id (need to create) needed. 
+    ids = [f"chunk_{i}" for i in range(len(embedding_values))]
+
+    collection.add(
+        documents = chunks,
+        embeddings = embedding_values,
+        ids = ids
+    )
+
+    print(f"ChromaDB Collection '{collection.name}' created successfully with {collection.count()} documents. Yay!")
+
+    return collection
+
 
 # ------------------------------------------------------------------------------------------------------------
 # Flask App Routes 
@@ -99,6 +112,13 @@ def process_file():
             return jsonify({"error": "Could not split text into chunks"}), 400
         
         embedded_chunks = embed_the_chunks(chunked_text)
+        if not embedded_chunks:
+            return jsonify({"error": "Could not embed the chunks"}), 400
+        
+        collection = create_chroma_collection(chunked_text, embedded_chunks)
+        if not collection:
+            return jsonify({"error": "Could not create the ChromaDB collection"}), 400
+
 
         return jsonify({
             "message": "File was processed successfully! Yay!",
@@ -110,7 +130,9 @@ def process_file():
             "chunk_preview": chunked_text[0][:100] 
             if chunked_text else "No chunks generated. Sorry!",
             "embeddings_preview": embedded_chunks[0][:5] 
-            if embedded_chunks else []
+            if embedded_chunks else [],
+            "collection_name": "moi_library",
+            "number_of_items_in_db": collection.count()
         }), 200
     
     except Exception as e: 
@@ -122,4 +144,3 @@ def process_file():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
